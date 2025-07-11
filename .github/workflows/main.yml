@@ -25,4 +25,4 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run the report script
-        run: stockportfolio_fundamentals_withgraph.py
+        run: python stockportfolio_fundamentals_withgraph.py
