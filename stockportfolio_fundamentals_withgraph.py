@@ -7,14 +7,21 @@ Original file is located at
     https://colab.research.google.com/drive/1bwPLerpzZ3nMAYqsceGe0jMxEIVxxh3g
 """
 
+import os
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 import matplotlib.pyplot as plt
 import yfinance as yf
 import mplcursors
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from tabulate import tabulate
 from IPython.display import display, Markdown
+
+# Ensure output dir exists
+os.makedirs("output", exist_ok=True)
 
 # ---------- Data Functions ----------
 
@@ -70,7 +77,7 @@ def get_stock_price(ticker):
 
 # ---------- Plotting Functions ----------
 
-def plot_fundamentals(df, ticker):
+def plot_and_save_fundamentals(df, ticker):
     df_plot = df.copy()
     df_plot[["Revenue (Cr)", "Net Profit (Cr)", "EPS"]] = df_plot[["Revenue (Cr)", "Net Profit (Cr)", "EPS"]].apply(pd.to_numeric, errors='coerce')
 
@@ -107,9 +114,11 @@ def plot_fundamentals(df, ticker):
     mplcursors.cursor([bars1, bars2, eps_line], hover=True)
 
     plt.show()
+    plt.savefig(f"output/{ticker}_fundamentals.png")
+    plt.close()
 
 
-def plot_ema_for_stock(ticker):
+def plot_and_save_ema_for_stock(ticker):
     stock = yf.Ticker(ticker + ".NS")
     hist = stock.history(period="1y")
 
@@ -137,7 +146,46 @@ def plot_ema_for_stock(ticker):
     plt.tight_layout()
     mplcursors.cursor(hover=True)
     plt.show()
+    plt.savefig(f"output/{ticker}_ema.png")
+    plt.close()
 
+def send_email(report_html):
+    msg = MIMEMultipart()
+    msg['Subject'] = "📊 Daily Stock Report"
+    msg['From'] = os.getenv("EMAIL_FROM")
+    msg['To'] = os.getenv("EMAIL_TO")
+    msg.attach(MIMEText(report_html, 'html'))
+
+    server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+    server.login(os.getenv("EMAIL_USER"), os.getenv("EMAIL_PASS"))
+    server.send_message(msg)
+    server.quit()
+
+def build_report():
+    html = ["<html><body><h1>📈 Daily Stock Report</h1>"]
+    stock_map = {"tcs": "TCS", "reliance": "RELIANCE", "infy": "INFY"}
+
+    for slug, ticker in stock_map.items():
+        df = get_quarterly_fundamentals(slug)
+        price = get_stock_price(ticker)
+        stock_html = f"<h2>{ticker} — ₹{price}</h2>"
+
+        if df is not None:
+            plot_and_save_fundamentals(df, ticker)
+            plot_and_save_ema(ticker)
+            stock_html += df.to_html(index=False)
+            stock_html += f'<img src="{ticker}_fundamentals.png"><br>'
+            stock_html += f'<img src="{ticker}_ema.png"><br>'
+
+        html.append(stock_html)
+
+    html.append("</body></html>")
+    return "\n".join(html)
+
+if __name__ == "__main__":
+    report = build_report()
+    send_email(report)
+    
 # ---------- Main Execution ----------
 
 stock_map = {
@@ -157,5 +205,5 @@ for slug, ticker in stock_map.items():
         print("\n📋 Fundamental Table:")
         print(tabulate(df, headers="keys", tablefmt="grid", showindex=False))
 
-        plot_fundamentals(df, ticker)
-        plot_ema_for_stock(ticker)
+        plot_and_save_fundamentals(df, ticker)
+        plot_and_save_ema_for_stock(ticker)
