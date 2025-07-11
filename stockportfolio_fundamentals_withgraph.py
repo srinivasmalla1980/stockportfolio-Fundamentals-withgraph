@@ -7,8 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/1bwPLerpzZ3nMAYqsceGe0jMxEIVxxh3g
 """
 
-!pip install mplcursors tabulate --quiet
-
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
