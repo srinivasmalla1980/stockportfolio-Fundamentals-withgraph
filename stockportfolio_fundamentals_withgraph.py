@@ -172,7 +172,7 @@ def build_report():
 
         if df is not None:
             plot_and_save_fundamentals(df, ticker)
-            plot_and_save_ema(ticker)
+            plot_and_save_ema_for_stock(ticker)
             stock_html += df.to_html(index=False)
             stock_html += f'<img src="{ticker}_fundamentals.png"><br>'
             stock_html += f'<img src="{ticker}_ema.png"><br>'
