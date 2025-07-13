@@ -26,7 +26,13 @@ jobs:
 
       - name: Run the report script
         run: python stockportfolio_fundamentals_withgraph_displayReport.py
-        
+
+      - name: Upload Report as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: DailyStockReport
+          path: output/report.html
+    
         env:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_TO:   ${{ secrets.EMAIL_TO }}
