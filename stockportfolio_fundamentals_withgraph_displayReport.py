@@ -113,7 +113,6 @@ def plot_and_save_fundamentals(df, ticker):
     # Enable tooltips
     mplcursors.cursor([bars1, bars2, eps_line], hover=True)
 
-    plt.show()
     plt.savefig(f"output/{ticker}_fundamentals.png")
     plt.close()
 
@@ -145,7 +144,7 @@ def plot_and_save_ema_for_stock(ticker):
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.tight_layout()
     mplcursors.cursor(hover=True)
-    plt.show()
+    
     plt.savefig(f"output/{ticker}_ema.png")
     plt.close()
 
@@ -207,3 +206,7 @@ for slug, ticker in stock_map.items():
 
         plot_and_save_fundamentals(df, ticker)
         plot_and_save_ema_for_stock(ticker)
+        # ✅ Save the final HTML report to the output folder
+        with open("output/report.html", "w", encoding="utf-8") as f:
+        f.write(full_html_report)
+
