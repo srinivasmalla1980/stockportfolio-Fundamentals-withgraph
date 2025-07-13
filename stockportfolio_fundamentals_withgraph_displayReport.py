@@ -153,8 +153,8 @@ def build_report():
             plot_and_save_fundamentals(df, ticker)
             plot_and_save_ema_for_stock(ticker)
             stock_html += df.to_html(index=False)
-            stock_html += f'<img src="{ticker}_fundamentals.png" style="width:90%;"><br>'
-            stock_html += f'<img src="{ticker}_ema.png" style="width:90%;"><br>'
+            stock_html += f'<img src="output/{ticker}_fundamentals.png" style="width:90%;"><br>'
+            stock_html += f'<img src="output/{ticker}_ema.png" style="width:90%;"><br>'
 
         html.append(stock_html)
 
