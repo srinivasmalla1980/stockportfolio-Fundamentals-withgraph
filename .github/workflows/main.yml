@@ -25,7 +25,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run the report script
-        run: python stockportfolio_fundamentals_withgraph.py
+        run: python stockportfolio_fundamentals_withgraph_emailreport.py
         env:
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
           EMAIL_TO:   ${{ secrets.EMAIL_TO }}
