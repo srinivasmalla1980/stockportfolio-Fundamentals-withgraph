@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import pandas as pd
 import subprocess
 import os
 import requests
@@ -141,6 +142,38 @@ def plot_and_save_ema_for_stock(ticker):
 # ---------- Build and Save HTML Report ----------
 
 def build_report():
+    html = ["<html><head><title>📊 Daily Stock Report</title></head><body><h1>📈 Daily Stock Report</h1>"]
+
+    # ✅ Read stock slugs and tickers from Excel file (e.g., stocks.xlsx with columns: slug, ticker)
+    df_stocks = pd.read_excel("stocks.xlsx")  # Excel file must have columns: 'slug' and 'ticker'
+
+    for _, row in df_stocks.iterrows():
+        slug = row["slug"]
+        ticker = row["ticker"]
+
+        df = get_quarterly_fundamentals(slug)
+        price = get_stock_price(ticker)
+        stock_html = f"<h2>{ticker} — ₹{price}</h2>"
+
+        if df is not None:
+            plot_and_save_fundamentals(df, ticker)
+            plot_and_save_ema_for_stock(ticker)
+            stock_html += df.to_html(index=False)
+            stock_html += f'<img src="output/{ticker}_fundamentals.png" style="width:90%;"><br>'
+            stock_html += f'<img src="output/{ticker}_ema.png" style="width:90%;"><br>'
+
+        html.append(stock_html)
+
+    html.append("</body></html>")
+    full_html_report = "\n".join(html)
+
+    # ✅ Save HTML report to output folder
+    with open("output/report.html", "w", encoding="utf-8") as f:
+        f.write(full_html_report)
+
+    print("✅ Report saved to output/report.html")
+    
+def build_report1():
     html = ["<html><head><title>📊 Daily Stock Report</title></head><body><h1>📈 Daily Stock Report</h1>"]
     stock_map = {"tcs": "TCS", "reliance": "RELIANCE", "infy": "INFY"}
 
