@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import feedparser
 import pandas as pd
 import subprocess
 import os
@@ -162,6 +163,15 @@ def build_report():
             stock_html += f'<img src="output/{ticker}_fundamentals.png" style="width:90%;"><br>'
             stock_html += f'<img src="output/{ticker}_ema.png" style="width:90%;"><br>'
 
+        # --- Fetch latest news from fetch_rss_headlines ---
+        feed_url = "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms"
+        keyword = "Gallantt"
+        headlines = fetch_rss_headlines(feed_url, keyword)
+        if headlines:
+            stock_html += f"<h3>🗞️ News Summary</h3><p>{headlines}</p><br>"
+        else:
+            stock_html += "<p>⚠️ No news headlines found.</p><br>"
+    
         html.append(stock_html)
 
     html.append("</body></html>")
@@ -172,6 +182,28 @@ def build_report():
         f.write(full_html_report)
 
     print("✅ Report saved to output/report.html")
+    
+#Not using this at the moment
+def fetch_latest_news_headlines(ticker):
+    query = f"{ticker} stock site:moneycontrol.com OR site:livemint.com OR site:economictimes.indiatimes.com"
+    headers = {"User-Agent": "Mozilla/5.0"}
+    search_url = f"https://www.google.com/search?q={query}&tbm=nws"
+
+    response = requests.get(search_url, headers=headers)
+    soup = BeautifulSoup(response.content, "html.parser")
+
+    headlines = []
+    for item in soup.select('div.dbsr')[:5]:  # limit to top 5
+        title = item.select_one('div.JheGif.nDgy9d')
+        if title:
+            headlines.append("• " + title.text)
+
+    return "\n".join(headlines)
+
+def fetch_rss_headlines(feed_url, keyword):
+    feed = feedparser.parse(feed_url)
+    headlines = [entry.title for entry in feed.entries if keyword.lower() in entry.title.lower()]
+    return "\n".join("• " + h for h in headlines[:5])
     
 def build_report1():
     html = ["<html><head><title>📊 Daily Stock Report</title></head><body><h1>📈 Daily Stock Report</h1>"]
