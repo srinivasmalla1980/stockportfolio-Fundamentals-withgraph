@@ -7,3 +7,4 @@ mplcursors
 tabulate
 ipython
 openpyxl
+feedparser
