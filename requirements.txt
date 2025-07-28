@@ -6,3 +6,4 @@ yfinance
 mplcursors
 tabulate
 ipython
+openpyxl
